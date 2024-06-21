@@ -28,13 +28,33 @@ def fetch_user_preferences(connection):
     preferences_df = pd.read_sql(query, connection)
     return preferences_df
 
+# def insert_article_to_db(articles):
+#     connection = connect_to_db()
+#     cursor = connection.cursor()
+#
+#     for article in articles:
+#         cursor.execute("""
+#                INSERT INTO lng.logistics_news_articles (news_datetime, fetch_datetime, news_text, website_url, title)
+#                VALUES (?, ?, ?, ?, ?)
+#            """,
+#                        article['news_datetime'],
+#                        article['fetch_datetime'],
+#                        article['news_text'],
+#                        article['website_url'],
+#                        article['title'])
+#
+#     connection.commit()
+#     cursor.close()
+#     connection.close()
+#
+
 def insert_article_to_db(articles):
     connection = connect_to_db()
     cursor = connection.cursor()
 
     for article in articles:
         cursor.execute("""
-               INSERT INTO lng.logistics_news_articles (news_datetime, fetch_datetime, news_text, website_url, title)
+               INSERT INTO lng.test_logistics_news_articles (news_datetime, fetch_datetime, news_text, website_url, title)
                VALUES (?, ?, ?, ?, ?)
            """,
                        article['news_datetime'],
@@ -42,30 +62,28 @@ def insert_article_to_db(articles):
                        article['news_text'],
                        article['website_url'],
                        article['title'])
-    
+
     connection.commit()
     cursor.close()
     connection.close()
 
-
-def insert_user_keyphrases(email, key_phrases):
+def insert_user_keyphrases(email):
     connection = connect_to_db()
     cursor = connection.cursor()
 
     cursor.execute("""
-        MERGE INTO lng.user_keyphrases AS target
-        USING (SELECT ? AS email, ? AS key_phrases) AS source
+        MERGE INTO lng.users AS target
+        USING (SELECT ? AS email) AS source
         ON (target.email = source.email)
         WHEN MATCHED THEN
-            UPDATE SET key_phrases = source.key_phrases
+            UPDATE SET email = source.email
         WHEN NOT MATCHED THEN
-            INSERT (email, key_phrases) VALUES (source.email, source.key_phrases);
-    """, email, key_phrases)
+            INSERT (email) VALUES (source.email);
+    """, email)
 
     connection.commit()
     cursor.close()
     connection.close()
-
 
 def remove_duplicate_articles():
     connection = connect_to_db()
@@ -78,7 +96,7 @@ def remove_duplicate_articles():
             id,
             website_url,
             ROW_NUMBER() OVER (PARTITION BY website_url ORDER BY id) AS rn
-        FROM lng.logistics_news_articles
+        FROM [lng].[test_logistics_news_articles]
     )
     DELETE FROM CTE WHERE rn > 1;
     """
