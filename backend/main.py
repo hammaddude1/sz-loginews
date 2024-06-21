@@ -6,6 +6,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from transformers import BertTokenizer, BertModel
 import numpy as np
 import torch
+from scrappers.scrapper import scrape_logistics_manager, scrape_world_cargo_news
+
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -41,29 +43,21 @@ def calculate_relevance_score(user_keywords, user_paragraph, article_content):
 
 @app.route('/process', methods=['GET'])
 def process():
-    connection = connect_to_db()
-    print('yolsadsao')
-    return "2321312"
-    
-    # articles = fetch_articles(connection)
-    # preferences = fetch_user_preferences(connection)
-    #
-    # results = []
-    # for _, pref_row in preferences.iterrows():
-    #     user_id = pref_row['user_id']
-    #     user_keywords = pref_row['keywords']
-    #     user_paragraph = pref_row['paragraph']
-    #
-    #     for _, article_row in articles.iterrows():
-    #         article_content = article_row['content']
-    #         relevance_score = calculate_relevance_score(user_keywords, user_paragraph, article_content)
-    #         results.append({
-    #             'user_id': user_id,
-    #             'article_id': article_row['article_id'],
-    #             'relevance_score': relevance_score
-    #         })
-    #
-    # return jsonify(results)
+
+#connection = connect_to_db()
+
+    logistics_articles = scrape_logistics_manager()
+    articles_list = []
+    for article in logistics_articles:
+        articles_list.append(article)
+    return jsonify(articles_list)
+
+    # world_cargo_articles = scrape_world_cargo_news()
+    # articles_list = []
+    # for article in world_cargo_articles:
+    #     articles_list.append(article)
+    # return jsonify(articles_list)
+
 
 
     # if __name__ == "__main__":
@@ -71,7 +65,7 @@ def process():
     # logistics_articles = scrape_logistics_manager()
     # for article in logistics_articles:
     #     insert_article_to_db(article)
-    
+
     # print("\nScraping World Cargo News:")
     # world_cargo_articles = scrape_world_cargo_news()
     # for article in world_cargo_articles:
