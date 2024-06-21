@@ -12,6 +12,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
       rel="stylesheet"
     />
+    <script src="config.js"></script>
     <style>
       body {
         background-color: #f8f9fa;
@@ -88,6 +89,8 @@
         .addEventListener("submit", function (event) {
           event.preventDefault();
 
+          const baseURL = config.API_ENDPOINT;
+
           const email = document.getElementById("email").value;
           const passkey = document.getElementById("passkey").value;
           const keyPhrases = document
@@ -95,7 +98,7 @@
             .value.split(",");
 
           // API endpoint
-          const apiEndpoint = "http://127.0.0.1:5000/add_user_keyphrases";
+          const apiEndpoint = `${baseURL}/add_user_keyphrases`;
 
           // Data to be sent to the server
           const userData = {
