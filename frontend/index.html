@@ -8,6 +8,10 @@
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+      rel="stylesheet"
+    />
     <style>
       body {
         background-color: #f8f9fa;
@@ -77,6 +81,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
       document
         .getElementById("key-phrase-form")
@@ -89,16 +94,34 @@
             .getElementById("key-phrases")
             .value.split(",");
 
-          // Store email, passkey, and key phrases as a JSON string
+          // API endpoint
+          const apiEndpoint = "http://127.0.0.1:5000/add_user_keyphrases";
+
+          // Data to be sent to the server
           const userData = {
+            email: email,
             passkey: passkey,
-            keyPhrases: keyPhrases,
+            key_phrases: keyPhrases.join(", "),
           };
 
-          localStorage.setItem(email, JSON.stringify(userData));
-
-          // Display a success message or update the UI as needed
-          alert("Data saved successfully!");
+          fetch(apiEndpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userData),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) {
+                toastr.error(data.error, "Error");
+              } else {
+                toastr.success(data.message, "Success");
+              }
+            })
+            .catch((error) => {
+              toastr.error("Failed to save data.", "Error");
+            });
         });
     </script>
   </body>
