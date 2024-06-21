@@ -25,20 +25,45 @@
         padding: 30px;
         border-radius: 10px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        min-height: 400px;
+        min-height: 600px;
       }
       .form-container h2 {
         margin-bottom: 20px;
       }
       .badge-container {
         margin-top: 10px;
+        background-color: red;
+      }
+
+      .btn-primary {
+        background-color: rgb(96, 214, 165);
+        border-color: rgb(96, 214, 165);
+      }
+      .btn-primary:hover {
+        background-color: rgb(80, 179, 139); /* Adjust hover color if needed */
+        border-color: rgb(
+          80,
+          179,
+          139
+        ); /* Adjust hover border color if needed */
       }
     </style>
   </head>
   <body>
+    <img
+      src="shipzero-logo.webp"
+      alt="logo"
+      style="
+        width: 200px;
+        margin-top: 10px;
+        margin-left: 10px;
+        margin-bottom: 10px;
+      "
+    />
     <div class="container">
       <div class="form-container">
-        <h2>sz-loginews-notifier</h2>
+        <h2>LogiNews Notifier</h2>
+
         <form id="key-phrase-form">
           <div class="form-group">
             <label for="email">Email:</label>
@@ -70,7 +95,9 @@
               required
             ></textarea>
           </div>
-          <button type="submit" class="btn btn-primary">Save</button>
+          <div style="display: flex; justify-content: center">
+            <button type="submit" class="btn btn-primary w-25">Save</button>
+          </div>
         </form>
       </div>
       <div id="key-phrases-list" class="mt-5 d-none">
@@ -95,7 +122,7 @@
           const passkey = document.getElementById("passkey").value;
           const keyPhrases = document
             .getElementById("key-phrases")
-            .value.split(",");
+            .value.split(/[\n,]+/);
 
           // API endpoint
           const apiEndpoint = `${baseURL}/add_user_keyphrases`;
@@ -104,7 +131,10 @@
           const userData = {
             email: email,
             passkey: passkey,
-            key_phrases: keyPhrases.join(", "),
+            key_phrases: keyPhrases
+              .map((phrase) => phrase.trim())
+              .filter((phrase) => phrase)
+              .join(", "),
           };
 
           fetch(apiEndpoint, {
@@ -132,15 +162,18 @@
         const phrasesList = document.getElementById("phrases-display");
         phrasesList.innerHTML = "";
 
-        keyPhrases.forEach((phrase) => {
-          const listItem = document.createElement("li");
-          listItem.className = "list-group-item";
-          const badge = document.createElement("span");
-          badge.className = "badge badge-primary";
-          badge.innerText = phrase.trim();
-          listItem.appendChild(badge);
-          phrasesList.appendChild(listItem);
-        });
+        keyPhrases
+          .map((phrase) => phrase.trim())
+          .filter((phrase) => phrase)
+          .forEach((phrase) => {
+            const listItem = document.createElement("li");
+            listItem.className = "list-group-item";
+            const badge = document.createElement("span");
+            badge.className = "badge badge-primary";
+            badge.innerText = phrase;
+            listItem.appendChild(badge);
+            phrasesList.appendChild(listItem);
+          });
 
         document.getElementById("key-phrases-list").classList.remove("d-none");
       }
