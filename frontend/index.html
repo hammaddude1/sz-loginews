@@ -20,14 +20,9 @@
         padding: 30px;
         border-radius: 10px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        min-height: 400px;
       }
       .form-container h2 {
-        margin-bottom: 20px;
-      }
-      #key-phrases-list {
-        margin-top: 30px;
-      }
-      #key-phrases-list h3 {
         margin-bottom: 20px;
       }
       .badge-container {
@@ -51,19 +46,29 @@
             />
           </div>
           <div class="form-group">
+            <label for="passkey">Passkey:</label>
+            <input
+              type="password"
+              class="form-control"
+              id="passkey"
+              name="passkey"
+              required
+            />
+          </div>
+          <div class="form-group">
             <label for="key-phrases">Key Phrases:</label>
             <textarea
               class="form-control"
               id="key-phrases"
               name="key-phrases"
-              rows="4"
+              rows="8"
               required
             ></textarea>
           </div>
           <button type="submit" class="btn btn-primary">Save</button>
         </form>
       </div>
-      <div id="key-phrases-list" class="mt-5">
+      <div id="key-phrases-list" class="mt-5 d-none">
         <h3>Saved Key Phrases</h3>
         <ul id="phrases-display" class="list-group"></ul>
       </div>
@@ -79,46 +84,22 @@
           event.preventDefault();
 
           const email = document.getElementById("email").value;
+          const passkey = document.getElementById("passkey").value;
           const keyPhrases = document
             .getElementById("key-phrases")
             .value.split(",");
 
-          // Store key phrases as a JSON string
-          localStorage.setItem(email, JSON.stringify(keyPhrases));
+          // Store email, passkey, and key phrases as a JSON string
+          const userData = {
+            passkey: passkey,
+            keyPhrases: keyPhrases,
+          };
 
-          // Display the key phrases
-          displayKeyPhrases();
+          localStorage.setItem(email, JSON.stringify(userData));
+
+          // Display a success message or update the UI as needed
+          alert("Data saved successfully!");
         });
-
-      function displayKeyPhrases() {
-        const phrasesDisplay = document.getElementById("phrases-display");
-        phrasesDisplay.innerHTML = "";
-
-        for (let i = 0; i < localStorage.length; i++) {
-          const email = localStorage.key(i);
-          const keyPhrases = JSON.parse(localStorage.getItem(email));
-
-          const listItem = document.createElement("li");
-          listItem.className = "list-group-item";
-          listItem.innerHTML = `<strong>Email:</strong> ${email}<br><strong>Key Phrases:</strong>`;
-
-          const badgeContainer = document.createElement("div");
-          badgeContainer.className = "badge-container";
-
-          keyPhrases.forEach((phrase) => {
-            const badge = document.createElement("span");
-            badge.className = "badge badge-primary mr-1";
-            badge.textContent = phrase.trim();
-            badgeContainer.appendChild(badge);
-          });
-
-          listItem.appendChild(badgeContainer);
-          phrasesDisplay.appendChild(listItem);
-        }
-      }
-
-      // Initial display of key phrases
-      displayKeyPhrases();
     </script>
   </body>
 </html>
