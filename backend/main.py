@@ -5,30 +5,99 @@ from db.connection import connect_to_db, fetch_articles, fetch_user_preferences,
 from dotenv import load_dotenv
 from scrappers.scrapper import scrape_logistics_manager, scrape_world_cargo_news, scrape_dvz_zero, scrape_dvz
 from flask_cors import CORS
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import pandas as pd
+import pyodbc
+from jinja2 import Environment, FileSystemLoader
 
 
 load_dotenv()
 PASSKEY = os.getenv('DB_PASSKEY')
+EMAIL_USER = os.getenv('EMAIL_USER')
+EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
+def fetch_news_details_for_user():
+    connection = connect_to_db()
+    query = """
+        SELECT
+    logistics_news_id,
+    summary,
+    keywords,
+    website_url,
+    update_ts
+    FROM
+        [lng].[parsed_news]
+    WHERE
+        update_ts = (SELECT MAX(update_ts) FROM [lng].[parsed_news]);
+    """
+    df = pd.read_sql(query, connection)
+    print(df)
+    connection.close()
+    return df
+
+def send_email(recipient_email, subject, articles):
+    # Load the HTML template
+    env = Environment(loader=FileSystemLoader('.'))
+    template = env.get_template('email_template.html')
+
+    # Render the template with article data
+    html_body = template.render(articles=articles)
+
+    msg = MIMEMultipart('alternative')
+    msg['From'] = EMAIL_USER
+    msg['To'] = recipient_email
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(html_body, 'html'))
+
+    # try:
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login(EMAIL_USER, EMAIL_PASSWORD)
+    text = msg.as_string()
+    server.sendmail(EMAIL_USER, recipient_email, text)
+    server.quit()
+    print(f"Email sent to {recipient_email}")
+    # except Exception as e:
+    #     print(f"Failed to send email to {recipient_email}: {str(e)}")
+
+
+def send_notifications_to_user(email):
+    news_details = fetch_news_details_for_user()
+    print(news_details)
+    for index, row in news_details.iterrows():
+        email_body = f"""
+        Summary: {row['summary']}
+        Keywords: {row['keywords']}
+        URL: {row['website_url']}
+        """
+        print(email_body)
+        send_email(row['email'], "Daily Logistics News Update", email_body)
 
 @app.route('/add_user_keyphrases', methods=['POST'])
 def add_user_keyphrases():
-    try:
-        data = request.get_json()
-        email = data['email']
-        # key_phrases = data['key_phrases']
-        passkey = data['passkey']
-        if passkey != PASSKEY:
-            return jsonify({"error": "Invalid passkey"}), 403
+    # try:
+    data = request.get_json()
+    email = data.get('email')
+    passkey = data.get('passkey')
 
+    if passkey != PASSKEY:
+        return jsonify({"error": "Invalid passkey"}), 403
+
+    # If email is provided, add the user
+    if email:
         insert_user_keyphrases(email)
-        return jsonify({"message": "User added successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}),
+        send_notifications_to_user(email)
+
+    return jsonify({"message": "Notification sent to the new user successfully"}), 200
+    # except Exception as e:
+    #     return jsonify({"error": str(e)}), 500
 
 @app.route('/keyphrases', methods=['GET'])
 def get_keyphrases():
@@ -39,9 +108,6 @@ def get_keyphrases():
     keyphrases = cursor.fetchall()
     cursor.close()
     connection.close()
-
-    # Debugging: Print the fetched data
-    print("Fetched keyphrases:", keyphrases)
 
     # Convert to a list of dictionaries
     keyphrases_list = [{'keyphrase': row[0]} for row in keyphrases]
