@@ -11,6 +11,8 @@ from email.mime.multipart import MIMEMultipart
 import pandas as pd
 import pyodbc
 from jinja2 import Environment, FileSystemLoader
+import base64
+
 
 
 load_dotenv()
@@ -41,15 +43,16 @@ def fetch_news_details_for_user():
     df = pd.read_sql(query, connection)
     print(df)
     connection.close()
-    return df
+    return df.to_dict(orient='records')
 
-def send_email(recipient_email, subject, articles):
+def send_email(recipient_email, subject, articles, base64_logo):
     # Load the HTML template
     env = Environment(loader=FileSystemLoader('.'))
     template = env.get_template('email_template.html')
 
+    print(articles)
     # Render the template with article data
-    html_body = template.render(articles=articles)
+    html_body = template.render(articles=articles, base64_logo=base64_logo)
 
     msg = MIMEMultipart('alternative')
     msg['From'] = EMAIL_USER
@@ -73,14 +76,18 @@ def send_email(recipient_email, subject, articles):
 def send_notifications_to_user(email):
     news_details = fetch_news_details_for_user()
     print(news_details)
-    for index, row in news_details.iterrows():
-        email_body = f"""
-        Summary: {row['summary']}
-        Keywords: {row['keywords']}
-        URL: {row['website_url']}
-        """
-        print(email_body)
-        send_email(email, "Daily Logistics News Update", email_body)
+    articles = []
+    for row in news_details:
+        articles.append({
+            'title': row['summary'],  # Assuming 'summary' contains the title, update if necessary
+            'summary': row['summary'],
+            'keywords': row['keywords'],
+            'website_url': row['website_url']
+        })
+    with open("shipzero-logo.webp", "rb") as image_file:
+        base64_logo = base64.b64encode(image_file.read()).decode('utf-8')
+    # print(email_body)
+    send_email(email, "Daily Logistics News Update", articles, base64_logo)
 
 @app.route('/add_user_keyphrases', methods=['POST'])
 def add_user_keyphrases():

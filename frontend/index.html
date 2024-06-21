@@ -96,6 +96,7 @@
               class="form-control"
               id="passkey"
               name="passkey"
+              required
             />
           </div>
           <div class="form-group">
@@ -154,8 +155,7 @@
           // Data to be sent to the server
           const userData = {
             email: email,
-            // passkey: passkey,
-            passkey: "8@HjL$z5m#Pq",
+            passkey: passkey,
             key_phrases: keyPhrases.join(","),
           };
 

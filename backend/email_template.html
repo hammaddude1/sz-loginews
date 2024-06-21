@@ -1,75 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daily Logistics News Update</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 80%;
-            margin: auto;
-            overflow: hidden;
-        }
-        .header, .footer {
-            background: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-        }
-        .content {
-            background: #fff;
-            padding: 20px;
-            margin-top: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .article {
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
-        }
-        .article:last-child {
-            border-bottom: none;
-        }
-        .article a {
-            color: #1a73e8;
-            text-decoration: none;
-        }
-        .article a:hover {
-            text-decoration: underline;
-        }
-        .keywords {
-            font-size: 0.9em;
-            color: #555;
-        }
-        .summary {
-            margin: 10px 0;
-            color: #333;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #fff;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 80%;
+        margin: auto;
+        overflow: hidden;
+      }
+      .header,
+      .footer {
+        background: rgb(96, 214, 165);
+        color: #fff;
+        padding: 10px 0;
+        text-align: left;
+      }
+      .header img {
+        width: 200px;
+        height: auto;
+        float: left;
+        margin: 10px;
+      }
+      .header h1 {
+        display: inline-block;
+        vertical-align: middle;
+        line-height: normal;
+        margin-left: 120px;
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      .content {
+        background: #fff;
+        padding: 20px;
+        margin-top: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .article {
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+      }
+      .article:last-child {
+        border-bottom: none;
+      }
+      .article-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #333;
+      }
+      .article-summary {
+        margin: 10px 0;
+        color: #333;
+      }
+      .article-url a {
+        color: #1a73e8;
+        text-decoration: none;
+      }
+      .article-url a:hover {
+        text-decoration: underline;
+      }
+      .article-keywords {
+        font-size: 0.9em;
+        color: #555;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="header">
-        <h1>Daily Logistics News Update</h1>
+      <img src="{{ logo_url }}" alt="shipzero logo" />
+      <h1>Daily Logistics News Update</h1>
     </div>
     <div class="container">
-        <div class="content">
-            {% for article in articles %}
-            <div class="article">
-                <h2><a href="{{ article.website_url }}">{{ article.title }}</a></h2>
-                <p class="summary">{{ article.summary }}</p>
-                <p class="keywords"><strong>Keywords:</strong> {{ article.keywords }}</p>
-            </div>
-            {% endfor %}
+      <div class="content">
+        {% for article in articles %}
+        <div class="article">
+          <div class="article-summary">
+            <strong>Summary:</strong> {{ article.summary }}
+          </div>
+          <div class="article-url">
+            <strong>URL:</strong>
+            <a href="{{ article.website_url }}">{{ article.website_url }}</a>
+          </div>
+          <div class="article-keywords">
+            <strong>Keywords:</strong> {{ article.keywords }}
+          </div>
         </div>
+        {% endfor %}
+      </div>
     </div>
     <div class="footer">
-        <p>&copy; 2024 Logistics News Aggregator. All rights reserved.</p>
+      <p>&copy; 2024 LogiNews. All rights reserved.</p>
     </div>
-</body>
+  </body>
 </html>
