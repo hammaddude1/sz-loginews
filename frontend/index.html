@@ -127,7 +127,11 @@
           const passkey = document.getElementById("passkey").value;
           const keyPhrases = document
             .getElementById("key-phrases")
-            .value.split(/[\n,]+/);
+            .value.split(/[\n,]+/)
+            .map((phrase) => phrase.trim())
+            .filter((phrase) => phrase)
+            .join(",")
+            .replace(/\s*,\s*/g, ",");
 
           // API endpoint
           const apiEndpoint = `${baseURL}/add_user_keyphrases`;
@@ -136,10 +140,7 @@
           const userData = {
             email: email,
             passkey: passkey,
-            key_phrases: keyPhrases
-              .map((phrase) => phrase.trim())
-              .filter((phrase) => phrase)
-              .join(", "),
+            key_phrases: keyPhrases,
           };
 
           fetch(apiEndpoint, {
@@ -155,7 +156,8 @@
                 toastr.error(data.error, "Error");
               } else {
                 toastr.success(data.message, "Success");
-                displayKeyPhrases(keyPhrases);
+                displayKeyPhrases(keyPhrases.split(","));
+                document.getElementById("key-phrase-form").reset(); // Reset form
               }
             })
             .catch((error) => {
