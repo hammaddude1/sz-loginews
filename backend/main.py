@@ -17,6 +17,8 @@ load_dotenv()
 PASSKEY = os.getenv('DB_PASSKEY')
 EMAIL_USER = os.getenv('EMAIL_USER')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
+SMTP_SERVER = os.getenv('SMTP_SERVER')
+SMTP_PORT = os.getenv('SMTP_PORT')
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -57,7 +59,7 @@ def send_email(recipient_email, subject, articles):
     msg.attach(MIMEText(html_body, 'html'))
 
     # try:
-    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
     server.starttls()
     server.login(EMAIL_USER, EMAIL_PASSWORD)
     text = msg.as_string()
@@ -78,7 +80,7 @@ def send_notifications_to_user(email):
         URL: {row['website_url']}
         """
         print(email_body)
-        send_email(row['email'], "Daily Logistics News Update", email_body)
+        send_email(email, "Daily Logistics News Update", email_body)
 
 @app.route('/add_user_keyphrases', methods=['POST'])
 def add_user_keyphrases():
