@@ -23,9 +23,6 @@ def add_user_keyphrases():
         key_phrases = data['key_phrases']
         passkey = data['passkey']
 
-        print(passkey)
-        print(PASSKEY)
-
         if passkey != PASSKEY:
             return jsonify({"error": "Invalid passkey"}), 403
 
