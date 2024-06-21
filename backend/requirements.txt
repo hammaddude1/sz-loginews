@@ -1,0 +1,7 @@
+pyodbc==4.0.32
+pandas==1.5.3
+scikit-learn==1.2.2
+transformers==4.27.1
+torch==1.13.1
+numpy==1.24.3
+python-dotenv==1.0.0
