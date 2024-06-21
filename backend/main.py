@@ -65,5 +65,18 @@ def process():
     #
     # return jsonify(results)
 
+
+    # if __name__ == "__main__":
+    # print("Scraping Logistics Manager:")
+    # logistics_articles = scrape_logistics_manager()
+    # for article in logistics_articles:
+    #     insert_article_to_db(article)
+    
+    # print("\nScraping World Cargo News:")
+    # world_cargo_articles = scrape_world_cargo_news()
+    # for article in world_cargo_articles:
+    #     insert_article_to_db(article)
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000,debug=True)
