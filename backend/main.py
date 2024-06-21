@@ -1,45 +1,38 @@
 import time
-from flask import Flask, jsonify
-from db.connection import connect_to_db, fetch_articles, fetch_user_preferences
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from transformers import BertTokenizer, BertModel
-import numpy as np
-import torch
+import os
+from flask import Flask, jsonify, request
+from db.connection import connect_to_db, fetch_articles, fetch_user_preferences, insert_user_keyphrases
+from dotenv import load_dotenv
 from scrappers.scrapper import scrape_logistics_manager, scrape_world_cargo_news
+from flask_cors import CORS
 
+
+load_dotenv()
+PASSKEY = os.getenv('DB_PASSKEY')
 
 # Initialize Flask app
 app = Flask(__name__)
+CORS(app)
 
-def calculate_tfidf_cosine_similarity(user_keywords, article_content):
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform([user_keywords, article_content])
-    cosine_sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
-    return cosine_sim[0][0]
 
-def calculate_semantic_similarity(user_paragraph, article_content):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    model = BertModel.from_pretrained('bert-base-uncased')
-    
-    def get_embedding(text):
-        inputs = tokenizer(text, return_tensors='pt', max_length=512, truncation=True, padding=True)
-        outputs = model(**inputs)
-        return np.mean(outputs.last_hidden_state.detach().numpy(), axis=1).flatten()
-    
-    user_embedding = get_embedding(user_paragraph)
-    article_embedding = get_embedding(article_content)
-    
-    cosine_sim = np.dot(user_embedding, article_embedding) / (np.linalg.norm(user_embedding) * np.linalg.norm(article_embedding))
-    return cosine_sim
+@app.route('/add_user_keyphrases', methods=['POST'])
+def add_user_keyphrases():
+    try:
+        data = request.get_json()
+        email = data['email']
+        key_phrases = data['key_phrases']
+        passkey = data['passkey']
 
-def calculate_relevance_score(user_keywords, user_paragraph, article_content):
-    tfidf_cosine_sim = calculate_tfidf_cosine_similarity(user_keywords, article_content)
-    semantic_similarity = calculate_semantic_similarity(user_paragraph, article_content)
-    
-    combined_score = 0.5 * tfidf_cosine_sim + 0.5 * semantic_similarity
-    normalized_score = min(max(combined_score, 0), 1)
-    return normalized_score
+        print(passkey)
+        print(PASSKEY)
+
+        if passkey != PASSKEY:
+            return jsonify({"error": "Invalid passkey"}), 403
+
+        insert_user_keyphrases(email, key_phrases)
+        return jsonify({"message": "User key phrases added successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 @app.route('/process', methods=['GET'])
 def process():
