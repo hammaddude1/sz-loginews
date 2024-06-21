@@ -42,26 +42,28 @@ def calculate_relevance_score(user_keywords, user_paragraph, article_content):
 @app.route('/process', methods=['GET'])
 def process():
     connection = connect_to_db()
+    print('yolsadsao')
+    return "2321312"
     
-    articles = fetch_articles(connection)
-    preferences = fetch_user_preferences(connection)
-    
-    results = []
-    for _, pref_row in preferences.iterrows():
-        user_id = pref_row['user_id']
-        user_keywords = pref_row['keywords']
-        user_paragraph = pref_row['paragraph']
-        
-        for _, article_row in articles.iterrows():
-            article_content = article_row['content']
-            relevance_score = calculate_relevance_score(user_keywords, user_paragraph, article_content)
-            results.append({
-                'user_id': user_id,
-                'article_id': article_row['article_id'],
-                'relevance_score': relevance_score
-            })
-    
-    return jsonify(results)
+    # articles = fetch_articles(connection)
+    # preferences = fetch_user_preferences(connection)
+    #
+    # results = []
+    # for _, pref_row in preferences.iterrows():
+    #     user_id = pref_row['user_id']
+    #     user_keywords = pref_row['keywords']
+    #     user_paragraph = pref_row['paragraph']
+    #
+    #     for _, article_row in articles.iterrows():
+    #         article_content = article_row['content']
+    #         relevance_score = calculate_relevance_score(user_keywords, user_paragraph, article_content)
+    #         results.append({
+    #             'user_id': user_id,
+    #             'article_id': article_row['article_id'],
+    #             'relevance_score': relevance_score
+    #         })
+    #
+    # return jsonify(results)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000,debug=True)
