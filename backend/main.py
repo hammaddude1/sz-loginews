@@ -1,7 +1,7 @@
 import time
 import os
 from flask import Flask, jsonify, request
-from db.connection import connect_to_db, fetch_articles, fetch_user_preferences, insert_user_keyphrases
+from db.connection import connect_to_db, fetch_articles, fetch_user_preferences, insert_user_keyphrases, remove_duplicate_articles
 from dotenv import load_dotenv
 from scrappers.scrapper import scrape_logistics_manager, scrape_world_cargo_news
 from flask_cors import CORS
@@ -35,11 +35,12 @@ def add_user_keyphrases():
 def process():
 
 #connection = connect_to_db()
-
     logistics_articles = scrape_logistics_manager()
     articles_list = []
     for article in logistics_articles:
         articles_list.append(article)
+
+    remove_duplicate_articles()
     return jsonify(articles_list)
 
     # world_cargo_articles = scrape_world_cargo_news()

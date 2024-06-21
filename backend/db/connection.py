@@ -65,3 +65,26 @@ def insert_user_keyphrases(email, key_phrases):
     connection.commit()
     cursor.close()
     connection.close()
+
+
+def remove_duplicate_articles():
+    connection = connect_to_db()
+    cursor = connection.cursor()
+
+    # Remove duplicates based on website_url, keeping the first occurrence
+    delete_duplicates_query = """
+    WITH CTE AS (
+        SELECT 
+            id,
+            website_url,
+            ROW_NUMBER() OVER (PARTITION BY website_url ORDER BY id) AS rn
+        FROM lng.logistics_news_articles
+    )
+    DELETE FROM CTE WHERE rn > 1;
+    """
+
+    cursor.execute(delete_duplicates_query)
+    connection.commit()
+
+    cursor.close()
+    connection.close()
